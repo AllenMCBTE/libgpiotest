@@ -3,6 +3,7 @@ import time
 
 chips = gpiod.chip_iter()
 chips = list(chips)
+print(chips)
 if not chips:
     print("No /dev/gpiochip device nodes were found. The kernel may lack GPIO chardev support, or libgpiod may not be properly installed.")
 else:
