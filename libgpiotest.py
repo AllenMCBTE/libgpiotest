@@ -1,12 +1,10 @@
+import glob
 import gpiod
-import time
 
-chips = gpiod.chip_iter()
-chips = list(chips)
-print(chips)
+def fail(msg):
+    print(f"[FAIL] {msg}")
+    exit(1)
+
+chips = sorted(glob.glob("/dev/gpiochip*"))
 if not chips:
-    print("No /dev/gpiochip device nodes were found. The kernel may lack GPIO chardev support, or libgpiod may not be properly installed.")
-else:
-    print(f"Found {len(chips)} GPIO chips:")
-    for c in chips:
-        print(f"- {c.name} ({c.label})")
+    fail("No /dev/gpiochip* devices found. The kernel may not support GPIO chardev, or libgpiod may not be installed correctly.")
