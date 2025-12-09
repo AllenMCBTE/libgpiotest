@@ -52,8 +52,16 @@ for chip_path in chips:
                 print(f'    Bias: {line_info.bias}')
                 print(f'    Drive: {line_info.drive}')
                 print(f'    Edge: {line_info.edge_detection}')
-                print('--- Start of requesting line as output ---')
-                
+                print('--- Start of the request for line as output ---')
+                cfg = {offset: gpiod.LineSettings(direction=Direction.OUTPUT, output_value=Value.INACTIVE)}
+                with gpiod.request_lines(chip_path, consumer="gpiod_v2_test_out", config=cfg) as req:
+                    print(f"Successfully requested line {offset} as OUTPUT")
+                    req.set_value(offset, Value.ACTIVE)
+                    v1 = req.get_value(offset)
+                    print(f"The returned value after inputting 1: {v1}")
+                    req.set_value(offset, Value.INACTIVE)
+                    v0 = req.get_value(offset)
+                    print(f"The returned value after inputting 0: {v0}")
             except Exception as e:
                 print(f'Exception occured while testing line {offset}: {e} Moving on to the next line.')
         if line_done:
@@ -64,10 +72,10 @@ for chip_path in chips:
             print('No tests to any line succeeded. Moving on to the next chip.')
             continue
     except Exception as e:
-        pass
+        print(f'Exception occured while testing chip {chip_path}: {e} Moving on to the next chip.')
 if not chip:
     fail('No chip available.')
 if done:
     print("\n=== End of libgpiod v2 functionality test ===")
 else:
-    fail('libgpiod v2 functionality test failed.')
+    fail('\n=== libgpiod v2 functionality test failed. ===')
