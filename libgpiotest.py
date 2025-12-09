@@ -62,6 +62,23 @@ for chip_path in chips:
                     req.set_value(offset, Value.INACTIVE)
                     v0 = req.get_value(offset)
                     print(f"The returned value after inputting 0: {v0}")
+                print('--- End of the request for line as output ---')
+                print('--- Start of the request for line as input ---')
+                cfg = {offset: gpiod.LineSettings(direction=Direction.INPUT)}
+                with gpiod.request_lines(chip_path, consumer="gpiod_v2_test_in", config=cfg) as req:
+                    print(f"Successfully requested line {offset} as INPUT")
+                    val = req.get_value(offset)
+                    print(f"Value of line {offset} read: {val}")
+                print('--- End of the request for line as input ---')
+                print('--- Start of the request for line to detect edge events ---')
+                cfg = {offset: gpiod.LineSettings(direction=Direction.INPUT, edge_detection=gpiod.line.Edge.BOTH)}
+                with gpiod.request_lines(chip_path, consumer="gpiod_v2_test_ev", config=cfg, event_buffer_size=8) as req:
+                    print('Successfully created edge-event request.')
+                    ev_ready = req.wait_edge_events(0.1)
+                    print(f'Event detection within 0.1 second: {ev_ready}')
+                print('--- End of the request for line to detect edge events ---')
+                line_done = True
+                break
             except Exception as e:
                 print(f'Exception occured while testing line {offset}: {e} Moving on to the next line.')
         if line_done:
@@ -70,11 +87,18 @@ for chip_path in chips:
             break
         else:
             print('No tests to any line succeeded. Moving on to the next chip.')
-            continue
     except Exception as e:
         print(f'Exception occured while testing chip {chip_path}: {e} Moving on to the next chip.')
+        try:
+            chip.close()
+        except Exception:
+            pass
 if not chip:
     fail('No chip available.')
+try:
+    chip.close()
+except Exception:
+    pass
 if done:
     print("\n=== End of libgpiod v2 functionality test ===")
 else:
