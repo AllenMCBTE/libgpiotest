@@ -19,16 +19,26 @@ for i in chips:
 
 for chip_path in chips:
     try:
-        print(f"\n Accessing chip {chip_path}")
+        print(f'Accessing chip {chip_path}')
         chip = gpiod.Chip(chip_path)
         info = chip.get_info()
-        print(f'Chip {chip_path} successfully accessed. Info: ')
-        print(f'    Name: {info.name}')
-        print(f'    Label: {info.label}')
-        print(f'    Number of lines: {info.num_lines}')
+        if info.num_lines < 1:
+            print(f'No line associated with chip {chip_path} available. Moving on to the next chip.')
+            chip = None
+            continue
+        break
     except Exception as e:
         try:
             chip.close()
-            info = None
         except Exception:
             pass
+        print(f'Failed to access chip {chip_path} Moving on to the next chip.')
+        chip = None
+if not chip:
+    fail('No chip available.')
+
+print(f'Chip {chip_path} successfully accessed. Info: ')
+print(f'    Name: {info.name}')
+print(f'    Label: {info.label}')
+print(f'    Number of lines: {info.num_lines}')
+
