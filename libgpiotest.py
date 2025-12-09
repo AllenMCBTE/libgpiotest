@@ -23,12 +23,12 @@ for chip_path in chips:
         continue
 
     info = chip.get_info()
-    print(f"Chip name: {info.name}")
-    print(f"Chip label: {info.label}")
-    print(f"Chip line number: {info.num_lines}")
+    print(f"    Chip name: {info.name}")
+    print(f"    Chip label: {info.label}")
+    print(f"    Chip line number: {info.num_lines}")
 
     if info.num_lines < 1:
-        print("No line to access, skipping.")
+        print("    No line to access, skipping.")
         continue
 
     print("\n--- LineInfo ---")
@@ -49,6 +49,7 @@ for chip_path in chips:
         print(f"    Edge        : {li.edge_detection}")
         print(f"    Event_clock : {li.event_clock}")
     
+    print("--- End of LineInfo ---")
     print("\n--- Trying to request line as output ---")
     
     config = gpiod.LineSettings()
